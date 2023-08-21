@@ -89,65 +89,67 @@ function drawGrid() {
 
 
 function activateCellOnClickAndDrag() {
-    let isDrawing = false;
-    let cellsToggled = {}; // Keep track of cells already toggled during the current drag
-    let lastToggledCell = null;
-    const brushSizeInput = document.getElementById('brushSize');
-  
-    canvas.addEventListener('mousedown', (event) => {
-      isDrawing = true;
-      const col = Math.floor((event.clientX - canvas.getBoundingClientRect().left - window.scrollX - canvas.style.marginLeft) / cellSize);
-      const row = Math.floor((event.clientY - canvas.getBoundingClientRect().top - window.scrollY - canvas.style.marginTop) / cellSize);
-      toggleCellState(row, col);
-      lastToggledCell = { row, col };
-      cellsToggled = { [`${row}-${col}`]: true };
-    });
-  
-    canvas.addEventListener('mousemove', (event) => {
-      if (isDrawing) {
-        const col = Math.floor((event.clientX - canvas.getBoundingClientRect().left - window.scrollX) / cellSize);
-        const row = Math.floor((event.clientY - canvas.getBoundingClientRect().top - window.scrollY) / cellSize);
-  
-        const brushSize = parseInt(brushSizeInput.value, 10) || 1;
-  
-        // Apply brush size to toggle cell state only if the cell has changed
-        if (!lastToggledCell || (lastToggledCell.row !== row || lastToggledCell.col !== col)) {
-          lastToggledCell = { row, col };
-          for (let i = -Math.floor(brushSize / 2); i <= Math.floor(brushSize / 2); i++) {
-            for (let j = -Math.floor(brushSize / 2); j <= Math.floor(brushSize / 2); j++) {
-              const newRow = row + i;
-              const newCol = col + j;
-  
-              if (!cellsToggled[`${newRow}-${newCol}`]) {
-                toggleCellState(newRow, newCol);
-                cellsToggled[`${newRow}-${newCol}`] = true;
-              }
+  let isDrawing = false;
+  let cellsToggled = {}; // Keep track of cells already toggled during the current drag
+  let lastToggledCell = null;
+  const brushSizeInput = document.getElementById('brushSize'); // Get the brush size slider element
+
+  canvas.addEventListener('mousedown', handleStart);
+  canvas.addEventListener('mousemove', handleMove);
+  canvas.addEventListener('mouseup', handleEnd);
+
+  canvas.addEventListener('touchstart', handleStart, { passive: false });
+  canvas.addEventListener('touchmove', handleMove, { passive: false });
+  canvas.addEventListener('touchend', handleEnd);
+
+  function handleStart(event) {
+    event.preventDefault();
+    isDrawing = true;
+    const touch = event.type.startsWith('touch') ? event.touches[0] : event;
+    const col = Math.floor((touch.clientX - canvas.getBoundingClientRect().left - window.scrollX) / cellSize);
+    const row = Math.floor((touch.clientY - canvas.getBoundingClientRect().top - window.scrollY) / cellSize);
+    toggleCellState(row, col);
+    lastToggledCell = { row, col };
+    cellsToggled = { [`${row}-${col}`]: true };
+  }
+
+  function handleMove(event) {
+    if (isDrawing) {
+      event.preventDefault();
+      const touch = event.type.startsWith('touch') ? event.touches[0] : event;
+      const col = Math.floor((touch.clientX - canvas.getBoundingClientRect().left - window.scrollX) / cellSize);
+      const row = Math.floor((touch.clientY - canvas.getBoundingClientRect().top - window.scrollY) / cellSize);
+
+      const brushSize = parseInt(brushSizeInput.value, 10) || 1;
+
+      // Apply brush size to toggle cell state only if the cell has changed
+      if (!lastToggledCell || (lastToggledCell.row !== row || lastToggledCell.col !== col)) {
+        lastToggledCell = { row, col };
+        for (let i = -Math.floor(brushSize / 2); i <= Math.floor(brushSize / 2); i++) {
+          for (let j = -Math.floor(brushSize / 2); j <= Math.floor(brushSize / 2); j++) {
+            const newRow = row + i;
+            const newCol = col + j;
+
+            if (!cellsToggled[`${newRow}-${newCol}`]) {
+              toggleCellState(newRow, newCol);
+              cellsToggled[`${newRow}-${newCol}`] = true;
             }
           }
         }
       }
-    });
-  
-    canvas.addEventListener('mouseup', () => {
-      isDrawing = false;
-      cellsToggled = {};
-      lastToggledCell = null;
-    });
-  
-    canvas.addEventListener('mouseleave', () => {
-      isDrawing = false;
-      cellsToggled = {};
-      lastToggledCell = null;
-    });
-  
-    function toggleCellState(row, col) {
-      cellStates[row][col] = !cellStates[row][col];
-      drawGrid();
     }
-  
-    drawGrid();
+  }
+
+  function handleEnd() {
+    isDrawing = false;
+    cellsToggled = {};
+    lastToggledCell = null;
+  }
+
+  // ... Other functions ...
+
+  drawGrid();
 }
-  
 
 activateCellOnClickAndDrag();
 
