@@ -1,4 +1,4 @@
-# gameoflife# Conway's Game of Life
+# gameoflife # Conway's Game of Life
 
 ![Game of Life Demo](demo.gif)
 
