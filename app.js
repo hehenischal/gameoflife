@@ -1,3 +1,7 @@
+document.addEventListener('DOMContentLoaded', function () {
+  const howItWorksModal = new bootstrap.Modal(document.getElementById('howItWorksModal'));
+  howItWorksModal.show();
+});
 const canvas = document.getElementById('gridCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -87,6 +91,10 @@ function drawGrid() {
   }
 }
 
+function toggleCellState(row, col) {
+  cellStates[row][col] = !cellStates[row][col];
+  drawGrid();
+}
 
 function activateCellOnClickAndDrag() {
   let isDrawing = false;

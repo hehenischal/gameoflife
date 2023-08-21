@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Game of life - Nischal Lamichhane</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 </head>
@@ -12,11 +12,37 @@
         <h1>Conway's Game of life </h1>
         <button class="btn btn-danger" id="activateButton" onClick=activateGameOfLifeLogic()>Start/Stop</button>
         <label for="brushSize">Brush Size:</label>
-        <input type="range" id="brushSize" min="1" max="20" value="1">
+        <input type="range" id="brushSize" min="1" max="20" value="1"><br>
+        <small>by <a href="https://github.com/hehenischal">nischal lamichhane</a></small>
     </center>   
     <canvas id="gridCanvas" style="cursor: grab;" contenteditable="false" tabindex="1"></canvas>
     
 
+    <div class="modal fade" id="howItWorksModal" tabindex="-1" aria-labelledby="howItWorksModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="howItWorksModalLabel">How It Works</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Add your explanation content here -->
+              <p>this is a zero player game. however, you can set the initial state (first state) of the grid. <br>
+                rules: <br>
+                Birth: A dead cell with exactly three live neighbors becomes a live cell in the next generation. <br>
+                Survival: A live cell with two or three live neighbors remains alive in the next generation. <br>        
+                Death: A live cell with fewer than two live neighbors dies (underpopulation) due to loneliness. <br>
+                Death: A live cell with more than three live neighbors dies (overpopulation) due to crowding.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got It</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
