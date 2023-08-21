@@ -5,6 +5,7 @@
 ## Description
 
 Conway's Game of Life is a cellular automaton devised by mathematician John Conway in 1970. It's a zero-player game that simulates the evolution of cells on a grid based on simple rules. This repository contains an interactive web application that visually demonstrates the Game of Life using JavaScript and HTML Canvas.
+IT WAS COMPLETELY MADE BY GPT. ALL I DID WAS ENGINEER THE PROMPT AND REARRANGE 20% OF THE CODE. 
 
 ## Features
 
