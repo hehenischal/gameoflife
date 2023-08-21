@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    cursor: crosshair;
+    width: 80vw;
+    height: 80vh;
+    
+    margin: 5vh 10vw;
+
+  }
+
+  #gridCanvas {
+    cursor: crosshair !important;
+  }
+  
+  button {
+    margin: 0 0.5em;
+    padding: 10px 20px;
+    height: fit-content;
+    height: 60px;
+    width: 160px;
+    font-size: 3em;
+    text-decoration: dashed;
+  }
+  input {
+    margin: 0 0.5em;
+    padding: 10px 20px;
+    height: 30px;
+    width: 100px;
+    font-size: large;
+  }
+
+  label {
+    font-size: 2em;
+  }
