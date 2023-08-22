@@ -1,3 +1,93 @@
+document.addEventListener('DOMContentLoaded', function () {
+  function activateCellOnClickAndDrag() {
+    let isDrawing = false;
+    let lastToggledCell = null;
+    const brushSizeInput = document.getElementById('brushSize');
+  
+    function calculateCanvasCoordinates(event) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+      const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+      
+      const offsetX = clientX - canvasRect.left;
+      const offsetY = clientY - canvasRect.top;
+      
+      return {
+        offsetX: offsetX,
+        offsetY: offsetY
+      };
+    }
+    
+    
+  
+    function handleStart(event) {
+      event.preventDefault();
+      const { offsetX, offsetY } = calculateCanvasCoordinates(event);
+      const col = Math.floor(offsetX / cellSize);
+      const row = Math.floor(offsetY / cellSize);
+      toggleCellState(row, col);
+      lastToggledCell = { row, col };
+      isDrawing = true;
+    }
+  
+    const handleMove = (event) => {
+      event.preventDefault();
+      if (isDrawing) {
+        const { offsetX, offsetY } = calculateCanvasCoordinates(event);
+  
+        const brushSize = parseInt(brushSizeInput.value, 10) || 1;
+  
+        const col = Math.floor(offsetX / cellSize);
+        const row = Math.floor(offsetY / cellSize);
+  
+        if (!lastToggledCell || (lastToggledCell.row !== row || lastToggledCell.col !== col)) {
+          lastToggledCell = { row, col };
+          const cellsToToggle = [];
+  
+          for (let i = -Math.floor(brushSize / 2); i <= Math.floor(brushSize / 2); i++) {
+            for (let j = -Math.floor(brushSize / 2); j <= Math.floor(brushSize / 2); j++) {
+              const newRow = row + i;
+              const newCol = col + j;
+  
+              if (!cellsToggled[`${newRow}-${newCol}`]) {
+                cellsToggled[`${newRow}-${newCol}`] = true;
+                cellsToToggle.push({ row: newRow, col: newCol });
+              }
+            }
+          }
+  
+          cellsToToggle.forEach(cell => toggleCellState(cell.row, cell.col));
+        }
+      }
+    }
+    
+  
+    const handleEnd = () => {
+      isDrawing = false;
+      lastToggledCell = null;
+      resetCellsToggled(); // Reset cellsToggled when drawing ends
+    };
+  
+    canvas.addEventListener('pointerdown', handleStart);
+    canvas.addEventListener('pointermove', handleMove);
+    canvas.addEventListener('pointerup', handleEnd);
+    canvas.addEventListener('pointerleave', handleEnd);    
+  
+    function toggleCellState(row, col) {
+      if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
+        cellStates[row][col] = !cellStates[row][col];
+        drawGrid();
+      }
+    }
+    document.addEventListener('touchmove', (event) => {
+      event.preventDefault();
+    }, { passive: false });
+  
+    drawGrid();
+  }
+
+  activateCellOnClickAndDrag();
+});
 
 document.addEventListener('DOMContentLoaded', function () {
   const howItWorksModal = new bootstrap.Modal(document.getElementById('howItWorksModal'));
@@ -98,95 +188,7 @@ function resetCellsToggled() {
   cellsToggled = {};
 }
 
-function activateCellOnClickAndDrag() {
-  let isDrawing = false;
-  let lastToggledCell = null;
-  const brushSizeInput = document.getElementById('brushSize');
 
-  function calculateCanvasCoordinates(event) {
-    const canvasRect = canvas.getBoundingClientRect();
-    const touch = event.touches[0];
-    const offsetX = touch.clientX - canvasRect.left;
-    const offsetY = touch.clientY - canvasRect.top;
-    return {
-      offsetX: offsetX,
-      offsetY: offsetY
-    };
-  }
-  
-
-  function handleStart(event) {
-    event.preventDefault();
-    const { offsetX, offsetY } = calculateCanvasCoordinates(event);
-    const col = Math.floor(offsetX / cellSize);
-    const row = Math.floor(offsetY / cellSize);
-    toggleCellState(row, col);
-    lastToggledCell = { row, col };
-    isDrawing = true;
-  }
-
-  const handleMove = (event) => {
-    event.preventDefault();
-    if (isDrawing) {
-      const { offsetX, offsetY } = calculateCanvasCoordinates(event);
-
-      const brushSize = parseInt(brushSizeInput.value, 10) || 1;
-
-      const col = Math.floor(offsetX / cellSize);
-      const row = Math.floor(offsetY / cellSize);
-
-      if (!lastToggledCell || (lastToggledCell.row !== row || lastToggledCell.col !== col)) {
-        lastToggledCell = { row, col };
-        const cellsToToggle = [];
-
-        for (let i = -Math.floor(brushSize / 2); i <= Math.floor(brushSize / 2); i++) {
-          for (let j = -Math.floor(brushSize / 2); j <= Math.floor(brushSize / 2); j++) {
-            const newRow = row + i;
-            const newCol = col + j;
-
-            if (!cellsToggled[`${newRow}-${newCol}`]) {
-              cellsToggled[`${newRow}-${newCol}`] = true;
-              cellsToToggle.push({ row: newRow, col: newCol });
-            }
-          }
-        }
-
-        cellsToToggle.forEach(cell => toggleCellState(cell.row, cell.col));
-      }
-    }
-  }
-  
-
-  const handleEnd = () => {
-    isDrawing = false;
-    lastToggledCell = null;
-    resetCellsToggled(); // Reset cellsToggled when drawing ends
-  };
-
-  canvas.addEventListener('mousedown', handleStart);
-  canvas.addEventListener('mousemove', handleMove);
-  canvas.addEventListener('mouseup', handleEnd);
-  canvas.addEventListener('mouseleave', handleEnd);
-
-  canvas.addEventListener('touchstart', handleStart);
-  canvas.addEventListener('touchmove', handleMove);
-  canvas.addEventListener('touchend', handleEnd);
-
-  function toggleCellState(row, col) {
-    if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
-      cellStates[row][col] = !cellStates[row][col];
-      drawGrid();
-    }
-  }
-  document.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-  }, { passive: true });
-
-  drawGrid();
-}
-
-
-activateCellOnClickAndDrag();
 
 let intervalId = null;
 
@@ -216,4 +218,19 @@ canvas.height = gridHeight * cellSize;
 
 
   drawGrid();
+
+
+
+  function forceRedraw() {
+    canvas.style.display = 'none';
+    canvas.offsetHeight; // Trigger reflow
+    canvas.style.display = 'block';
+  }
+  
+  function toggleCellState(row, col) {
+    if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
+      cellStates[row][col] = !cellStates[row][col];
+      forceRedraw();
+    }
+  }
 
