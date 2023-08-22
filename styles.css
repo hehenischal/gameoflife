@@ -1,6 +1,7 @@
 body {
     margin: 0;
     overflow-y: scroll;
+    font-size: 4em;
   }
   canvas {
     display: block;
@@ -34,5 +35,34 @@ body {
   }
 
   label {
+    font-size: 1.5em;
+  }
+  .footer {
+    width: 100% ;
+    display: flex;
+    justify-content: space-evenly;
+    gap:30px;
+  }
+  .footer a {
     font-size: 2em;
+    text-decoration: none;
+    color: purple;
+    text-transform: capitalize;
+  }
+  p {
+    margin:5%;
+  }
+  .about-text {
+    font-size: 2em;
+  }
+
+  @media screen and (max-width: 600px) {
+    .about-text 
+    {
+      font-size: 1em;
+    }
+
+    #gridCanvas {
+      cursor: crosshair !important;
+    }
   }

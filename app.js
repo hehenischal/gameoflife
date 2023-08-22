@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function () {
   const howItWorksModal = new bootstrap.Modal(document.getElementById('howItWorksModal'));
   howItWorksModal.show();
@@ -91,73 +92,99 @@ function drawGrid() {
   }
 }
 
-function toggleCellState(row, col) {
-  cellStates[row][col] = !cellStates[row][col];
-  drawGrid();
+let cellsToggled = {};
+
+function resetCellsToggled() {
+  cellsToggled = {};
 }
 
 function activateCellOnClickAndDrag() {
   let isDrawing = false;
-  let cellsToggled = {}; // Keep track of cells already toggled during the current drag
   let lastToggledCell = null;
-  const brushSizeInput = document.getElementById('brushSize'); // Get the brush size slider element
+  const brushSizeInput = document.getElementById('brushSize');
 
-  canvas.addEventListener('mousedown', handleStart);
-  canvas.addEventListener('mousemove', handleMove);
-  canvas.addEventListener('mouseup', handleEnd);
-
-  canvas.addEventListener('touchstart', handleStart, { passive: false });
-  canvas.addEventListener('touchmove', handleMove, { passive: false });
-  canvas.addEventListener('touchend', handleEnd);
+  function calculateCanvasCoordinates(event) {
+    const canvasRect = canvas.getBoundingClientRect();
+    const touch = event.touches[0];
+    const offsetX = touch.clientX - canvasRect.left;
+    const offsetY = touch.clientY - canvasRect.top;
+    return {
+      offsetX: offsetX,
+      offsetY: offsetY
+    };
+  }
+  
 
   function handleStart(event) {
     event.preventDefault();
-    isDrawing = true;
-    const touch = event.type.startsWith('touch') ? event.touches[0] : event;
-    const col = Math.floor((touch.clientX - canvas.getBoundingClientRect().left - window.scrollX) / cellSize);
-    const row = Math.floor((touch.clientY - canvas.getBoundingClientRect().top - window.scrollY) / cellSize);
+    const { offsetX, offsetY } = calculateCanvasCoordinates(event);
+    const col = Math.floor(offsetX / cellSize);
+    const row = Math.floor(offsetY / cellSize);
     toggleCellState(row, col);
     lastToggledCell = { row, col };
-    cellsToggled = { [`${row}-${col}`]: true };
+    isDrawing = true;
   }
 
-  function handleMove(event) {
+  const handleMove = (event) => {
+    event.preventDefault();
     if (isDrawing) {
-      event.preventDefault();
-      const touch = event.type.startsWith('touch') ? event.touches[0] : event;
-      const col = Math.floor((touch.clientX - canvas.getBoundingClientRect().left - window.scrollX) / cellSize);
-      const row = Math.floor((touch.clientY - canvas.getBoundingClientRect().top - window.scrollY) / cellSize);
+      const { offsetX, offsetY } = calculateCanvasCoordinates(event);
 
       const brushSize = parseInt(brushSizeInput.value, 10) || 1;
 
-      // Apply brush size to toggle cell state only if the cell has changed
+      const col = Math.floor(offsetX / cellSize);
+      const row = Math.floor(offsetY / cellSize);
+
       if (!lastToggledCell || (lastToggledCell.row !== row || lastToggledCell.col !== col)) {
         lastToggledCell = { row, col };
+        const cellsToToggle = [];
+
         for (let i = -Math.floor(brushSize / 2); i <= Math.floor(brushSize / 2); i++) {
           for (let j = -Math.floor(brushSize / 2); j <= Math.floor(brushSize / 2); j++) {
             const newRow = row + i;
             const newCol = col + j;
 
             if (!cellsToggled[`${newRow}-${newCol}`]) {
-              toggleCellState(newRow, newCol);
               cellsToggled[`${newRow}-${newCol}`] = true;
+              cellsToToggle.push({ row: newRow, col: newCol });
             }
           }
         }
+
+        cellsToToggle.forEach(cell => toggleCellState(cell.row, cell.col));
       }
     }
   }
+  
 
-  function handleEnd() {
+  const handleEnd = () => {
     isDrawing = false;
-    cellsToggled = {};
     lastToggledCell = null;
-  }
+    resetCellsToggled(); // Reset cellsToggled when drawing ends
+  };
 
-  // ... Other functions ...
+  canvas.addEventListener('mousedown', handleStart);
+  canvas.addEventListener('mousemove', handleMove);
+  canvas.addEventListener('mouseup', handleEnd);
+  canvas.addEventListener('mouseleave', handleEnd);
+
+  canvas.addEventListener('touchstart', handleStart);
+  canvas.addEventListener('touchmove', handleMove);
+  canvas.addEventListener('touchend', handleEnd);
+
+  function toggleCellState(row, col) {
+    if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
+      cellStates[row][col] = !cellStates[row][col];
+      drawGrid();
+    }
+  }
+  document.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+  }, { passive: true });
 
   drawGrid();
 }
+
 
 activateCellOnClickAndDrag();
 
@@ -187,29 +214,6 @@ let scale = 1; // Initial scale
 canvas.width = gridWidth * cellSize;
 canvas.height = gridHeight * cellSize;
 
-function handleZoom(event) {
-    const zoomFactor = Math.sign(event.deltaY) > 0 ? 0.9 : 1.1; // Zoom in or out based on scroll direction
-    const oldScale = scale;
-    scale *= zoomFactor;
-  
-    // Adjust cell size based on new scale
-    cellSize *= scale;
-    canvas.width = gridWidth * cellSize;
-    canvas.height = gridHeight * cellSize;
-  
-    // Calculate new offset to maintain the zoom center
-    const offsetX = (event.clientX - canvas.getBoundingClientRect().left) * (1 - scale / oldScale);
-    const offsetY = (event.clientY - canvas.getBoundingClientRect().top) * (1 - scale / oldScale);
-  
-    // Redraw the grid
-    drawGrid();
-  
-    // Adjust scroll position to maintain the zoom center
-    canvas.scrollLeft += offsetX;
-    canvas.scrollTop += offsetY;
-  }
-  
-  canvas.addEventListener('wheel', handleZoom);
-  
+
   drawGrid();
 
